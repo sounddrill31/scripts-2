@@ -4,6 +4,9 @@ TOKEN=" "
 CHAT_ID=" "
 file_path=" "
 
+# Fetch PWD
+current_dir=$(pwd)
+
 send_telegram_message() {
     local message="$1"
     curl -s -X POST \
@@ -23,7 +26,7 @@ upload_logs() {
 upload_file() {
     local file_path="$1"
     # Execute upload.sh with file path as argument and capture its output
-    download_link=$(bash upload.sh "$file_path")
+    download_link=$(bash $current_dir/upload.sh "$file_path")
     if [ -n "$download_link" ]; then
         send_telegram_message "%0A$download_link"
     fi
@@ -32,7 +35,7 @@ upload_file() {
 
 send_telegram_message "Your Build has been started!"
 
-bash build.sh > build_logs.txt 2>&1
+bash $current_dir/build.sh > build_logs.txt 2>&1
 
 if [ $? -eq 0 ]; then
     echo "Build completed, notifying on Telegram"
