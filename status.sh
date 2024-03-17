@@ -4,8 +4,8 @@ TOKEN=" "
 CHAT_ID=" "
 file_path=" "
 
-# Fetch PWD
-current_dir=$(pwd)
+# Fetch script's dir
+current_dir=$(pwd)/scripts
 
 send_telegram_message() {
     local message="$1"
