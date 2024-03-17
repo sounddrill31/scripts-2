@@ -35,7 +35,7 @@ upload_file() {
 
 send_telegram_message "Your Build has been started!"
 
-bash $current_dir/build.sh > build_logs.txt 2>&1
+bash $current_dir/build.sh 2>&1 | tee build_logs.txt
 
 if [ $? -eq 0 ]; then
     echo "Build completed, notifying on Telegram"
