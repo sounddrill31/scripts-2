@@ -1,7 +1,7 @@
 #!/bin/bash
 
-TOKEN="$TOKEN"
-CHAT_ID="$CHAT_ID"
+TOKEN=" "
+CHAT_ID=" "
 file_path="out/target/product/device/*zip"
 
 # Fetch script's dir
@@ -17,7 +17,7 @@ send_telegram_message() {
 }
 
 upload_logs() {
-    local response=$(cat build_logs.txt | curl -F 'sprunge=<-' http://sprunge.us)
+    local response=$(curl -F 'sprunge=<-' http://sprunge.us < build_logs.txt)
     local url=$(echo "$response" | grep -oP 'https?://\S+')
     send_telegram_message "Fail: Build failed.%0ALogs uploaded successfully.%0ALog URL: $url"
 }
@@ -32,16 +32,18 @@ upload_file() {
     fi
 }
 
-
 send_telegram_message "Your Build has been started!"
 
-bash $current_dir/build.sh 2>&1 | tee build_logs.txt
+# Execute build.sh and capture its exit code and output
+bash $current_dir/build.sh | tee build_logs.txt
+build_exit_code=${PIPESTATUS[0]}  # Capture the exit code of build.sh
 
-if [ $? -eq 0 ]; then
+if [ $build_exit_code -eq 0 ]; then
     echo "Build completed, notifying on Telegram"
     send_telegram_message "Your Build is successfully completed!"
     echo "Uploading Build!"
     upload_file "$file_path"
 else
     upload_logs
+    exit 1
 fi

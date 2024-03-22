@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm -rf packages/services/Car/ packages/apps/CellBroadcastReceiver/ packages/apps/Traceur/ packages/apps/TvSettings/ packages/apps/Updater/ frameworks/base/
 # init and sync
 rm -rf .repo/local_manifests
 repo init -u https://github.com/LeafOS-Project/android.git -b leaf-3.1
