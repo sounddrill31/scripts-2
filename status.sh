@@ -1,8 +1,8 @@
 #!/bin/bash
 
-TOKEN=" "
-CHAT_ID=" "
-file_path=" "
+TOKEN="$TOKEN"
+CHAT_ID="$CHAT_ID"
+file_path="out/target/product/device/*zip"
 
 # Fetch script's dir
 current_dir=$(pwd)/scripts

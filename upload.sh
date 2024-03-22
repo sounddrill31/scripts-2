@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Function to display Pac-Man progress bar
+pacman_progress() {
+    local width=50
+    local progress=$((($1 * $width) / $2))
+    local remaining=$((width - progress))
+    printf "["
+    printf "%0.s█" $(seq 1 $progress)
+    printf "%0.s " $(seq 1 $remaining)
+    printf "] %d%%\r" $((($1 * 100) / $2))
+}
+
 # Check if file path is provided as argument
 if [ $# -ne 1 ]; then
     echo "Usage: $0 <file_path>"
@@ -15,6 +26,12 @@ if [ ! -f "$file_path" ]; then
     exit 1
 fi
 
+# Get the total size of the file
+file_size=$(wc -c < "$file_path")
+
+# Initialize variables for progress tracking
+progress=0
+
 # Make the GET request to retrieve server information
 server_info=$(curl -s -X GET 'https://api.gofile.io/servers')
 
@@ -28,7 +45,7 @@ if [ -z "$server" ]; then
 fi
 
 # Upload the file using the server name
-upload_result=$(curl --progress-bar -X POST "https://$server.gofile.io/contents/uploadfile" -F "file=@$file_path")
+upload_result=$(curl --progress-bar -X POST "https://$server.gofile.io/contents/uploadfile" -F "file=@$file_path" | tee /dev/stderr | wc -c)
 
 # Extract and print the download link
 download_link=$(echo "$upload_result" | jq -r '.data.downloadPage')
