@@ -6,7 +6,7 @@ jobs:
   test:
     name: Build using foss.crave.io
       # Change this to self-hosted after setting up devspace as github actions runner
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
@@ -21,7 +21,21 @@ jobs:
           sudo chmod 777 /crave-devspaces
         else
           echo "We are already running in devspace... Skipping Symlinks"
+        fi
 
+          export PROJECTFOLDER="/crave-devspaces/Lineage21"
+          export PROJECTID="72"
+
+        if grep -q "$PROJECTFOLDER" <(crave clone list --json | jq -r '.clones[]."Cloned At"') && [ "${DCDEVSPACE}" == "1" ]; then
+          crave clone destroy -y $PROJECTFOLDER || echo "Error removing $PROJECTFOLDER"
+          crave clone create --projectID $PROJECTID $PROJECTFOLDER || echo "Crave clone create failed!"
+        else          
+        rm -rf $PROJECTFOLDER || true
+        mkdir $PROJECTFOLDER
+        fi
+        echo "PROJECTFOLDER=$PROJECTFOLDER" >> "$GITHUB_ENV"
+        echo "PROJECTID=$PROJECTID"  >> "$GITHUB_ENV"
+        echo "OLDDIR=$(pwd)" >> "$GITHUB_ENV"
       # Download and configure 'crave'.
     - name: Configure the 'crave' environment
       run: |
@@ -52,13 +66,11 @@ jobs:
       run: |
         crave run --no-patch -- "rm -rf scripts && \
         git clone https://github.com/bouquet-playground/scripts.git && \
-        export bot_token="${{ secrets.TELEGRAM_BOT_TOKEN }}" && \
-        export chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" && \
         bash scripts/status.sh"
 
     - name: Inform Sethji
-        uses: appleboy/telegram-action@master
-        with:
+      uses: appleboy/telegram-action@master
+      with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: "Your build has successfully queued!"
