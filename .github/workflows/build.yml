@@ -32,6 +32,10 @@ jobs:
         else          
         rm -rf $PROJECTFOLDER || true
         mkdir $PROJECTFOLDER
+        OLDDIR=$(pwd)
+        cd $PROJECTFOLDER
+        repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --git-lfs --depth=1
+        cd $OLDDIR
         fi
         echo "PROJECTFOLDER=$PROJECTFOLDER" >> "$GITHUB_ENV"
         echo "PROJECTID=$PROJECTID"  >> "$GITHUB_ENV"
@@ -64,6 +68,7 @@ jobs:
 
     - name: Start compilation through 'crave'
       run: |
+        cd $PROJECTFOLDER
         crave run --no-patch -- "rm -rf scripts && \
         git clone https://github.com/bouquet-playground/scripts.git && \
         bash scripts/status.sh"
@@ -74,3 +79,12 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: "Your build has successfully queued!"
+
+      # Remove 'crave' clone
+    - name: Destroy Crave Clone
+      run: |
+        if grep -q "$PROJECTFOLDER" <(crave clone list --json | jq -r '.clones[]."Cloned At"') && [ "${DCDEVSPACE}" == "1" ]; then
+          crave clone destroy -y $PROJECTFOLDER || echo "Error removing $PROJECTFOLDER"
+        else          
+          rm -rf $PROJECTFOLDER || true
+        fi
