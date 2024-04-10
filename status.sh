@@ -1,8 +1,8 @@
 #!/bin/bash
 
-TOKEN=" "
-CHAT_ID=" "
-file_path="out/target/product/device/*zip"
+TOKEN="$bot_token"
+CHAT_ID="$chat_id"
+file_path="out/target/product/*/*zip"
 
 # Fetch script's dir
 current_dir=$(pwd)/scripts
